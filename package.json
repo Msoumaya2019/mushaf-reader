@@ -10,17 +10,18 @@
     "prebuild:ios": "expo prebuild --platform ios --clean"
   },
   "dependencies": {
-    "expo": "~57.0.0",
-    "expo-audio": "~1.0.0",
+    "expo": "~57.0.25",
+    "expo-audio": "~57.0.5",
     "expo-font": "~57.0.4",
     "expo-modules-core": "~57.0.19",
-    "expo-status-bar": "~3.0.0",
-    "react": "19.1.0",
-    "react-native": "0.81.4"
+    "expo-status-bar": "~57.0.1",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-worklets": "0.10.1"
   },
   "devDependencies": {
     "@types/node": "~26.6.2",
-    "@types/react": "~19.1.0",
-    "typescript": "~5.9.2"
+    "@types/react": "~19.2.2",
+    "typescript": "~6.0.3"
   }
 }
