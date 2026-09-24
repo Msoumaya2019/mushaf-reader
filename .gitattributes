@@ -1,0 +1,13 @@
+# Les scripts doivent garder des fins de ligne LF, même si le dépôt est
+# modifié depuis Windows : un `build-ipa.sh` en CRLF échoue sur le runner
+# macOS avec « bad interpreter: /usr/bin/env: bash^M ».
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Fichiers binaires : jamais de conversion.
+*.ttf binary
+*.png binary
+*.jpg binary
+*.ipa binary
+*.bin binary
