@@ -1,0 +1,25 @@
+ELECTRONIC END-USER LICENSE AGREEMENT
+KFGQPC HAFS Uthmanic Script (UthmanicHafs.ttf)
+
+Copyright (c) 2010 by King Fahd Glorious Quran Printing Complex (KFGQPC),
+AlMadinah AlMunawarrah, Kingdom of Saudi Arabia. All Rights Reserved.
+ISBN: 978-603-8010-15-0, Accession No. 1430/7278
+
+Permission is hereby granted, Free of Cost, to any person obtaining a copy
+of this Font accompanying this license, the rights to Use, Copy, Distribute,
+subject to the following conditions:
+
+1. The Font Software cannot be Sold, Modified, Altered, Translated, Reverse
+   Engineered, Decompiled, Disassembled, Reproduced or Attempted to discover
+   the Source Code of this Font in no means.
+
+2. The Font Software is provided "AS IS", and KFGQPC makes no warranties as
+   to its use or performance, fitness for a particular purpose.
+
+Source: http://fonts.qurancomplex.gov.sa/
+
+NOTE TECHNIQUE
+--------------
+Ce fichier n'est pas inclus dans le depot. Executer
+`python tools/fetch_font.py <source.ipa>` pour le copier localement avant
+de compiler. Toute redistribution doit inclure le present texte de licence.

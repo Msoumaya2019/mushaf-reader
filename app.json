@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Apprendre le Coran",
+    "slug": "coran-memoire-reader",
+    "version": "0.9.2",
+    "orientation": "portrait",
+    "scheme": "coranmemoire",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "bundleIdentifier": "fr.coranmemoire.reader",
+      "buildNumber": "1",
+      "supportsTablet": true,
+      "infoPlist": {
+        "UIBackgroundModes": ["audio"],
+        "UIViewControllerBasedStatusBarAppearance": true
+      }
+    },
+    "android": {
+      "package": "fr.coranmemoire.reader",
+      "versionCode": 1,
+      "permissions": ["android.permission.FOREGROUND_SERVICE", "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"]
+    },
+    "plugins": [
+      "expo-audio"
+    ],
+    "assetBundlePatterns": ["assets/**/*"]
+  }
+}

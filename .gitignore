@@ -1,0 +1,17 @@
+node_modules/
+.expo/
+dist/
+build/
+*.log
+.DS_Store
+ios/
+android/
+Payload/
+*.ipa
+*.app
+
+# La police Uthmanic Hafs (KFGQPC) EST versionnee : sa licence autorise
+# explicitement l'usage, la copie et la distribution gratuits -- elle
+# interdit seulement la vente et la modification. La committer est ce qui
+# permet au runner de compilation de l'avoir sans etape manuelle.
+# Voir assets/fonts/LICENSE-UthmanicHafs.txt.

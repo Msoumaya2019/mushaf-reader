@@ -1,0 +1,26 @@
+{
+  "name": "coran-memoire-reader",
+  "version": "0.9.2",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "test": "node --experimental-strip-types --test src/reader/sync.test.mjs src/reader/navigation.test.mjs src/app/dataContract.test.mjs",
+    "check": "tsc --noEmit",
+    "start": "expo start",
+    "prebuild:ios": "expo prebuild --platform ios --clean"
+  },
+  "dependencies": {
+    "expo": "~57.0.0",
+    "expo-audio": "~1.0.0",
+    "expo-font": "~57.0.4",
+    "expo-modules-core": "~57.0.19",
+    "expo-status-bar": "~3.0.0",
+    "react": "19.1.0",
+    "react-native": "0.81.4"
+  },
+  "devDependencies": {
+    "@types/node": "~26.6.2",
+    "@types/react": "~19.1.0",
+    "typescript": "~5.9.2"
+  }
+}

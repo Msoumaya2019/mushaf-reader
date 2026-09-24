@@ -1,0 +1,134 @@
+name: IPA iPhone non signé
+
+# Compile l'application sur un runner macOS et rend un IPA NON SIGNE,
+# destiné à un service de signature externe.
+#
+# Deux points qui décident du résultat :
+#   - CODE_SIGNING_ALLOWED=NO : sans cela, xcodebuild cherche un certificat
+#     et échoue faute d'identité de signature ;
+#   - la signature résiduelle de l'exécutable est retirée après coup, sinon
+#     le service reçoit un binaire déjà signé.
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      # Les deux portes de vérification tournent AVANT la compilation :
+      # inutile de payer dix minutes de runner macOS pour un projet fautif.
+      - name: Épreuves
+        run: npm test
+
+      - name: Contrôle des types
+        run: npm run check
+
+      # La police du mushaf est versionnée (licence KFGQPC : distribution
+      # gratuite autorisée). On vérifie qu'elle est bien arrivée : sans elle,
+      # la compilation passe et l'application s'affiche dans la police
+      # système, ce qui se voit seulement à l'écran.
+      - name: Vérifier la police embarquée
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s assets/fonts/UthmanicHafs.ttf
+          echo "Police : $(wc -c < assets/fonts/UthmanicHafs.ttf) octets"
+
+      - name: Générer le projet natif iOS
+        run: npx expo prebuild --platform ios --no-install
+
+      - name: Installer les dépendances iOS
+        run: pod install --project-directory=ios
+
+      - name: Compiler sans signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Le nom du workspace et celui du schéma dérivent du slug, et
+          # cette dérivation change selon les versions d'Expo : on les lit
+          # sur ce que prebuild vient d'écrire, on ne les devine pas.
+          WORKSPACE="$(find ios -maxdepth 1 -name '*.xcworkspace' -print -quit)"
+          test -n "$WORKSPACE"
+          SCHEME="$(basename "$WORKSPACE" .xcworkspace)"
+          echo "workspace : $WORKSPACE"
+          echo "schéma    : $SCHEME"
+          xcodebuild \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/mushaf-build" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY='' \
+            EXPANDED_CODE_SIGN_IDENTITY='' \
+            build
+
+      - name: Empaqueter l'IPA non signé
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP="$(find "$RUNNER_TEMP/mushaf-build/Build/Products/Release-iphoneos" \
+            -maxdepth 1 -name '*.app' -print -quit)"
+          test -n "$APP"
+          echo "application : $APP"
+
+          # Retirer la signature résiduelle, sinon le service de signature
+          # reçoit un binaire déjà signé.
+          codesign --remove-signature "$APP/$(basename "$APP" .app)" 2>/dev/null || true
+
+          mkdir -p unsigned/Payload
+          ditto "$APP" "unsigned/Payload/$(basename "$APP")"
+          (cd unsigned && zip -qry ../mushaf-reader-unsigned.ipa Payload)
+
+          # Un IPA tronqué ne se voit qu'à l'installation : on le teste ici.
+          unzip -t mushaf-reader-unsigned.ipa >/dev/null
+          echo "IPA : $(du -h mushaf-reader-unsigned.ipa | cut -f1)"
+
+      - name: Vérifier que l'IPA n'est pas signé
+        shell: bash
+        run: |
+          set -euo pipefail
+          unzip -q mushaf-reader-unsigned.ipa -d verif
+          APP="$(find verif/Payload -maxdepth 1 -name '*.app' -print -quit)"
+          EXE="$APP/$(basename "$APP" .app)"
+          if codesign -dv "$EXE" 2>/dev/null; then
+            echo "ERREUR : l'exécutable porte encore une signature." >&2
+            exit 1
+          fi
+
+          # Le bundle JS doit être là : c'est ce qui contient toute la logique
+          # et les données du Coran.
+          test -s "$APP/main.jsbundle"
+          echo "bundle : $(du -h "$APP/main.jsbundle" | cut -f1)"
+
+          # Les données sont importées par `require` dans le bundle JS : elles
+          # ne sont donc PAS des fichiers séparés dans le .app. On vérifie
+          # qu'elles y sont bien encodées, sans quoi l'application s'ouvrirait
+          # sur un écran vide.
+          for marqueur in "reciters" "uthmani" "headerSurahs"; do
+            if ! grep -qa "$marqueur" "$APP/main.jsbundle"; then
+              echo "ERREUR : « $marqueur » absent du bundle." >&2
+              exit 1
+            fi
+          done
+
+          # La police, elle, est un asset natif : elle doit être un fichier.
+          test -n "$(find "$APP" -name 'UthmanicHafs.ttf' -print -quit)"
+          echo "IPA non signé, bundle et police présents."
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mushaf-reader-unsigned-ipa
+          path: mushaf-reader-unsigned.ipa
+          if-no-files-found: error
